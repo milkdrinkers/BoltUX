@@ -1,0 +1,232 @@
+package io.github.milkdrinkers.boltux.listener;
+
+import com.destroystokyo.paper.MaterialTags;
+import io.github.milkdrinkers.boltux.BoltUX;
+import io.github.milkdrinkers.boltux.data.EntityGroups;
+import io.github.milkdrinkers.boltux.data.MaterialGroups;
+import io.github.milkdrinkers.boltux.data.Permissions;
+import io.github.milkdrinkers.boltux.gui.GuiHandler;
+import io.github.milkdrinkers.boltux.hook.Hook;
+import io.github.milkdrinkers.boltux.packets.GlowingBlock;
+import io.github.milkdrinkers.boltux.packets.GlowingEntity;
+import io.github.milkdrinkers.boltux.utility.BlockUtil;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
+import org.popcraft.bolt.BoltPlugin;
+import org.popcraft.bolt.protection.BlockProtection;
+import org.popcraft.bolt.protection.EntityProtection;
+import org.popcraft.bolt.util.Permission;
+
+public final class ProtectionInteractListeners implements Listener {
+    private final BoltPlugin boltPlugin;
+
+    public ProtectionInteractListeners() {
+        boltPlugin = BoltUX.getBoltPlugin();
+    }
+
+    @SuppressWarnings("unused")
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onProtectedBlockRightClick(PlayerInteractEvent e) {
+        if (e.getAction() != Action.RIGHT_CLICK_BLOCK) {
+            return;
+        }
+
+        if (e.getHand() == null) {
+            return;
+        }
+
+        if (e.getHand().equals(EquipmentSlot.OFF_HAND)) {
+            return;
+        }
+
+        final Block block = e.getClickedBlock();
+        if (block == null) {
+            return;
+        }
+
+        if (!boltPlugin.isProtected(block)) {
+            return;
+        }
+
+        final Player player = e.getPlayer();
+        final Material material = block.getType();
+        BlockProtection protection = boltPlugin.loadProtection(block);
+        if (protection == null) {
+            if (MaterialTags.DOORS.isTagged(material)) {
+                protection = boltPlugin.loadProtection(block.getRelative(BlockFace.DOWN));
+                if (protection == null) {
+                    return;
+                }
+            } else if (material.equals(Material.CHEST) || material.equals(Material.TRAPPED_CHEST)) {
+                protection = boltPlugin.loadProtection(BlockUtil.getConnectedDoubleChest(block));
+                if (protection == null) {
+                    return;
+                }
+            } else {
+                return;
+            }
+        }
+
+        // Determine if player is protection owner
+        final boolean isOwner = protection.getOwner().equals(player.getUniqueId());
+        if (isOwner || player.hasPermission(Permissions.ADMIN_PERMISSION)) {
+            if (player.isSneaking() && player.getInventory().getItemInMainHand().getType().equals(Material.AIR)) {
+                GuiHandler.generateMainMenu(player, protection, block.getLocation());
+                e.setCancelled(true);
+                return;
+            }
+            return;
+        }
+
+        // Towny Compat
+        if (Hook.Towny.isLoaded()) {
+            if (Hook.getTownyHook().canAccessProtection(false, player, block.getLocation())) {
+                if (player.isSneaking() && player.getInventory().getItemInMainHand().getType().equals(Material.AIR)) {
+                    GuiHandler.generateMainMenu(player, protection, block.getLocation());
+                    e.setCancelled(true);
+                    return;
+                }
+                return;
+            }
+        }
+
+        boolean canAccess = true;
+        if (MaterialGroups.containerBlocks.contains(material)) {
+            canAccess = boltPlugin.canAccess(protection, player, Permission.INTERACT, Permission.OPEN);
+        } else if (MaterialGroups.interactableBlocks.contains(material)) {
+            canAccess = boltPlugin.canAccess(protection, player, Permission.INTERACT);
+        } else if (MaterialGroups.otherBlocks.contains(material)) {
+            canAccess = boltPlugin.canAccess(protection, player, Permission.INTERACT);
+        }
+
+        // Display red glowing block if player does not have access
+        if (!canAccess) {
+            if (Hook.PacketEvents.isLoaded()) {
+                GlowingBlock glowingBlock = new GlowingBlock(block, player);
+                glowingBlock.glow(NamedTextColor.RED);
+            }
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onProtectedEntityRightClick(PlayerInteractEntityEvent e) {
+        if (e.getHand().equals(EquipmentSlot.OFF_HAND)) {
+            return;
+        }
+
+        final Entity entity = e.getRightClicked();
+        final Player player = e.getPlayer();
+        final EntityProtection protection = boltPlugin.loadProtection(entity);
+        if (protection == null) {
+            return;
+        }
+
+        // Determine if player is protection owner
+        final boolean isOwner = protection.getOwner().equals(player.getUniqueId());
+        if (isOwner || player.hasPermission(Permissions.ADMIN_PERMISSION)) {
+            if (player.isSneaking() && player.getInventory().getItemInMainHand().getType().equals(Material.AIR)) {
+                GuiHandler.generateMainMenu(player, protection, entity.getLocation());
+                e.setCancelled(true);
+                return;
+            }
+            return;
+        }
+
+        // Towny Compat
+        if (Hook.Towny.isLoaded()) {
+            if (Hook.getTownyHook().canAccessProtection(false, player, entity.getLocation())) {
+                if (player.isSneaking() && player.getInventory().getItemInMainHand().getType().equals(Material.AIR)) {
+                    GuiHandler.generateMainMenu(player, protection, entity.getLocation());
+                    e.setCancelled(true);
+                    return;
+                }
+                return;
+            }
+        }
+
+        final EntityType entityType = entity.getType();
+
+        boolean canAccess = true;
+        if (EntityGroups.chestBoats.contains(entityType)) {
+            canAccess = boltPlugin.canAccess(protection, player, Permission.INTERACT, Permission.OPEN, Permission.MOUNT);
+        } else if (EntityGroups.containerMinecarts.contains(entityType)) {
+            canAccess = boltPlugin.canAccess(protection, player, Permission.INTERACT, Permission.OPEN);
+        } else if (EntityGroups.otherInteractableEntities.contains(entityType)) {
+            canAccess = boltPlugin.canAccess(protection, player, Permission.INTERACT);
+        } else if (EntityGroups.otherEntities.contains(entityType)) {
+            canAccess = boltPlugin.canAccess(protection, player, Permission.INTERACT);
+        }
+
+        // Make entity glow red if player does not have access
+        if (!canAccess) {
+            if (Hook.PacketEvents.isLoaded()) {
+                new GlowingEntity(entity, player, NamedTextColor.RED);
+            }
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onProtectedEntityRightClick(PlayerInteractAtEntityEvent e) {
+        if (e.getHand().equals(EquipmentSlot.OFF_HAND)) {
+            return;
+        }
+
+        final Entity entity = e.getRightClicked();
+        if (entity.getType() != EntityType.ARMOR_STAND) {
+            return;
+        }
+
+        final Player player = e.getPlayer();
+        final EntityProtection protection = boltPlugin.loadProtection(entity);
+        if (protection == null) {
+            return;
+        }
+
+        // Determine if player is protection owner
+        final boolean isOwner = protection.getOwner().equals(player.getUniqueId());
+        if (isOwner || player.hasPermission(Permissions.ADMIN_PERMISSION)) {
+            if (player.isSneaking() && player.getInventory().getItemInMainHand().getType().equals(Material.AIR)) {
+                GuiHandler.generateMainMenu(player, protection, entity.getLocation());
+                e.setCancelled(true);
+                return;
+            }
+            return;
+        }
+
+        // Towny Compat
+        if (Hook.Towny.isLoaded()) {
+            if (Hook.getTownyHook().canAccessProtection(false, player, entity.getLocation())) {
+                if (player.isSneaking() && player.getInventory().getItemInMainHand().getType().equals(Material.AIR)) {
+                    GuiHandler.generateMainMenu(player, protection, entity.getLocation());
+                    e.setCancelled(true);
+                    return;
+                }
+                return;
+            }
+        }
+
+        final boolean canAccess = boltPlugin.canAccess(protection, player, Permission.INTERACT);
+
+        // Make entity glow red if player does not have access
+        if (!canAccess) {
+            if (Hook.PacketEvents.isLoaded()) {
+                new GlowingEntity(entity, player, NamedTextColor.RED);
+            }
+        }
+    }
+}

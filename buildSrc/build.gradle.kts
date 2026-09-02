@@ -17,14 +17,12 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        create("projectextensions") {
-            id = "projectextensions"
+        register("projectextensions") {
             implementationClass = "ProjectExtensionsPlugin"
         }
     }
     plugins {
-        create("versioning") {
-            id = "versioning"
+        register("versioning") {
             implementationClass = "versioning.VersioningPlugin"
         }
     }
