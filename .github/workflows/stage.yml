@@ -109,7 +109,7 @@ jobs:
 #        shell: bash
 #        run: |
 #          set +e  # Don't exit immediately on error
-#          ./gradlew publish -PaltVer=${{ steps.version.outputs.version }} -x test
+#          ./gradlew build publish -PaltVer=${{ steps.version.outputs.version }} -x test
 #          PUBLISHING_EXIT_CODE=$?
 #
 #          if [ PUBLISHING_EXIT_CODE -ne 0 ]; then
@@ -211,7 +211,7 @@ jobs:
 #        shell: bash
 #        run: |
 #          set +e  # Don't exit immediately on error
-#          ./gradlew publishAllPublicationsToMavenCentralRepository -PaltVer=${{ steps.version.outputs.version }} -x test
+#          ./gradlew build publishAllPublicationsToMavenCentralRepository -PaltVer=${{ steps.version.outputs.version }} -x test
 #          PUBLISHING_EXIT_CODE=$?
 #
 #          if [ PUBLISHING_EXIT_CODE -ne 0 ]; then
