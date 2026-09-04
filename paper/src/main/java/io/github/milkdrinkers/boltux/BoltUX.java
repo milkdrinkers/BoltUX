@@ -8,6 +8,7 @@ import io.github.milkdrinkers.boltux.hook.HookManager;
 import io.github.milkdrinkers.boltux.listener.ListenerHandler;
 import io.github.milkdrinkers.boltux.lock.CraftingHandler;
 import io.github.milkdrinkers.boltux.lock.LockHandler;
+import io.github.milkdrinkers.boltux.lock.item.LockItemHandler;
 import io.github.milkdrinkers.boltux.threadutil.SchedulerHandler;
 import io.github.milkdrinkers.boltux.translation.TranslationHandler;
 import io.github.milkdrinkers.boltux.updatechecker.UpdateHandler;
@@ -32,6 +33,7 @@ public final class BoltUX extends AbstractBoltUX {
     private HookManager hookManager;
     private CommandHandler commandHandler;
     private ListenerHandler listenerHandler;
+    private LockItemHandler lockItemHandler;
     private LockHandler lockHandler;
     private BoltUXAPIProvider apiHandler;
 
@@ -54,8 +56,9 @@ public final class BoltUX extends AbstractBoltUX {
         hookManager = new HookManager(this);
         commandHandler = new CommandHandler(instance);
         listenerHandler = new ListenerHandler(instance);
+        lockItemHandler = new LockItemHandler();
         lockHandler = new LockHandler(instance);
-        apiHandler = new BoltUXAPIProvider(instance);
+        apiHandler = new BoltUXAPIProvider(lockItemHandler);
 
         handlers = List.of(
             configHandler,
@@ -66,6 +69,7 @@ public final class BoltUX extends AbstractBoltUX {
             hookManager,
             commandHandler,
             listenerHandler,
+            lockItemHandler,
             lockHandler,
             apiHandler
         );
@@ -115,6 +119,10 @@ public final class BoltUX extends AbstractBoltUX {
 
     public @NotNull HookManager getHookManager() {
         return hookManager;
+    }
+
+    public @NotNull LockItemHandler getLockItemHandler() {
+        return lockItemHandler;
     }
 
     public @NotNull UpdateHandler getUpdateHandler() {

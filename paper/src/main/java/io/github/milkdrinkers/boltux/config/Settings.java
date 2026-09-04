@@ -1,15 +1,10 @@
 package io.github.milkdrinkers.boltux.config;
 
-import io.github.milkdrinkers.boltux.data.ItemPlugin;
+import io.github.milkdrinkers.boltux.BoltUX;
 import io.github.milkdrinkers.boltux.utility.Cfg;
-import io.github.milkdrinkers.boltux.utility.Logger;
-import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.intellij.lang.annotations.Subst;
 
@@ -29,11 +24,11 @@ public class Settings {
     }
 
     public static boolean isLockItemEnabled() {
-        return Cfg.get().lockItem.enabled;
+        return BoltUX.getInstance().getLockItemHandler().isEnabled();
     }
 
     public static boolean isDefaultLockCraftingRecipeEnabled() {
-        return Cfg.get().lockItem.enableCraftingRecipe;
+        return Cfg.get().lockItem.enableCraftingRecipe && Cfg.get().lockItem.item.isBlank();
     }
 
     public static boolean isLockDroppingEnabled() {
@@ -61,57 +56,6 @@ public class Settings {
             .stream()
             .map(Bukkit::getWorld)
             .filter(Objects::nonNull)
-            .toList();
-    }
-
-    public static ItemPlugin getItemPlugin() {
-        // Default to empty String, no plugin
-        final String itemPluginString = Cfg.get().lockItem.itemPlugin;
-        if (itemPluginString.isEmpty() || itemPluginString.equalsIgnoreCase("None")) {
-            return ItemPlugin.NONE;
-        } else if (itemPluginString.equalsIgnoreCase("ItemsAdder")) {
-            return ItemPlugin.ITEMSADDER;
-        } else if (itemPluginString.equalsIgnoreCase("MMOItems")) {
-            return ItemPlugin.MMOITEMS;
-        } else if (itemPluginString.equalsIgnoreCase("Nexo")) {
-            return ItemPlugin.NEXO;
-        } else if (itemPluginString.equalsIgnoreCase("Oraxen")) {
-            return ItemPlugin.ORAXEN;
-        } else {
-            Logger.get().warn("Invalid 'item-plugin' defined in config.yml. Defaulting to none...");
-            return ItemPlugin.NONE;
-        }
-    }
-
-    public static String getCustomLockItemID() {
-        return Cfg.get().lockItem.customLockItemId;
-    }
-
-    public static Material getDefaultLockItemMaterial() {
-        try {
-            return Material.valueOf(Cfg.get().lockItem.defaultLockItem.material);
-        } catch (IllegalArgumentException e) {
-            return Material.IRON_INGOT;
-        }
-    }
-
-    public static int getDefaultLockItemCustomModelData() {
-        return Cfg.get().lockItem.defaultLockItem.customModelData;
-    }
-
-    public static Component getDefaultLockItemDisplayName() {
-        return ColorParser.of(Cfg.get().lockItem.defaultLockItem.displayName)
-            .build()
-            .decoration(TextDecoration.ITALIC, false);
-    }
-
-    public static List<Component> getDefaultLockItemLore() {
-        final List<String> loreStrings = Cfg.get().lockItem.defaultLockItem.lore;
-        if (loreStrings.isEmpty())
-            return List.of(Component.empty());
-
-        return loreStrings.stream()
-            .map(line -> ColorParser.of(line).build().decoration(TextDecoration.ITALIC, false))
             .toList();
     }
 

@@ -20,7 +20,7 @@ dependencies {
         exclude("net.kyori")
     }
     api(libs.threadutil.bukkit)
-
+    implementation(libs.itemutils)
     implementation(libs.gson)
 
     // Plugin dependencies
@@ -29,12 +29,7 @@ dependencies {
     compileOnly(libs.vault)
     compileOnly(libs.boltbukkit)
     compileOnly(libs.packetevents)
-    compileOnly(libs.itemsadder)
-    compileOnly(libs.nexo)
-    compileOnly(libs.oraxen)
     compileOnly(libs.towny)
-    compileOnly(libs.mythiclib)
-    compileOnly(libs.mmoitems)
     compileOnly(libs.quickshop.bukkit)
     compileOnly(libs.quickshop.api)
 
@@ -63,6 +58,7 @@ tasks {
         reloc("io.github.milkdrinkers.wordweaver.lib.gson", "google.gson")
         reloc("io.github.milkdrinkers.wordweaver", "wordweaver")
         reloc("io.github.milkdrinkers.colorparser", "colorparser")
+        reloc("io.github.milkdrinkers.itemutil", "itemutil")
         reloc("io.github.milkdrinkers.threadutil", "threadutil")
         reloc("org.snakeyaml", "snakeyaml")
         reloc("org.json", "json")
@@ -96,7 +92,7 @@ tasks {
             modrinth("Bolt", "1.1.52")
             modrinth("BoltTowny", "1.0.1")
             github("MilkBowl", "Vault", "1.7.3", "Vault.jar")
-            modrinth("PacketEvents", "2.11.2+spigot")
+            modrinth("PacketEvents", "2.13.0+spigot")
             modrinth("Towny", "0.101.2.0")
         }
     }
@@ -125,7 +121,7 @@ bukkit { // Options: https://docs.eldoria.de/pluginyml/bukkit/
     // Misc properties
     load = net.minecrell.pluginyml.bukkit.BukkitPluginDescription.PluginLoadOrder.POSTWORLD // STARTUP or POSTWORLD
     depend = listOf("Bolt")
-    softDepend = listOf("Vault", "PacketEvents", "PlaceholderAPI", "Towny", "QuickShop-Hikari", "ItemsAdder", "Nexo", "Oraxen", "MMOItems")
+    softDepend = listOf("Vault", "PacketEvents", "PlaceholderAPI", "Towny", "QuickShop-Hikari", "ItemsAdder", "Nexo", "Oraxen")
     loadBefore = listOf()
     provides = listOf()
 }
@@ -184,10 +180,6 @@ paper { // Options: https://docs.eldoria.de/pluginyml/paper/
             required = false
         }
         register("Oraxen") {
-            load = PaperPluginDescription.RelativeLoadOrder.BEFORE
-            required = false
-        }
-        register("MMOItems") {
             load = PaperPluginDescription.RelativeLoadOrder.BEFORE
             required = false
         }

@@ -5,6 +5,7 @@ import dev.jorel.commandapi.arguments.ArgumentSuggestions;
 import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
 import io.github.milkdrinkers.boltux.api.BoltUXAPI;
+import io.github.milkdrinkers.boltux.config.Settings;
 import io.github.milkdrinkers.boltux.data.Permissions;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
@@ -39,12 +40,13 @@ final class BoltUXCommand extends Command {
                     .replaceSuggestions(ArgumentSuggestions.strings("64", "32", "16"))
             )
             .executesPlayer((Player sender, CommandArguments args) -> {
-                Integer amount = (Integer) args.get("amount");
-                if (amount == null) {
-                    sender.getInventory().addItem(BoltUXAPI.getInstance().getLockItem(1));
+                if (!Settings.isLockItemEnabled()) {
+                    sender.sendMessage(Component.translatable("boltux.commands.getlock.unavailable"));
                     return;
                 }
-                sender.getInventory().addItem(BoltUXAPI.getInstance().getLockItem(amount));
+
+                final Integer amount = (Integer) args.get("amount");
+                sender.getInventory().addItem(BoltUXAPI.getInstance().getLockItem(amount == null ? 1 : amount));
             });
     }
 }

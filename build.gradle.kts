@@ -51,10 +51,6 @@ subprojects {
         }
 
         maven("https://repo.opencollab.dev/maven-snapshots/") // Configurate (GeyserMC fork)
-        maven("https://maven.devs.beer/") // ItemsAdderAPI
-        maven("https://repo.nexomc.com/releases") // Nexo
-        maven("https://repo.oraxen.com/releases") // Oraxen
-        maven("https://nexus.phoenixdevt.fr/repository/maven-public") // Phoenix Development (MMOItems)
     }
 
     dependencies {

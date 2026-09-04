@@ -2,18 +2,21 @@ package io.github.milkdrinkers.boltux.config;
 
 import io.github.milkdrinkers.boltux.config.migration.Migration;
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.interfaces.meta.Exclude;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @ConfigSerializable
 public class PluginConfig implements VersionedConfig {
     @Comment("Do not change this value!")
-    public int configVersion = 1;
+    public int configVersion = 2;
 
     @Override
     @Exclude
@@ -43,6 +46,28 @@ public class PluginConfig implements VersionedConfig {
                 .relocate(NodePath.path("TownyCompatibility", "disableLockingInOtherTowns"), "towny", "disable-locking-in-other-towns")
                 .relocate(NodePath.path("TownyCompatibility", "allowMayorsToAccessLocked"), "towny", "allow-mayors-to-access-locked")
                 .relocate(NodePath.path("QuickShopCompatibility", "disableLockingShops"), "quick-shop", "disable-locking-shops")
+                .build(),
+            2, Migration.builder()
+                .withTransform(
+                    ConfigurationTransformation.builder()
+                        .addAction(NodePath.path("lock-item"), (path, lockItem) -> {
+                            final String plugin = lockItem.node("item-plugin").getString("");
+                            final String itemId = lockItem.node("custom-lock-item-id").getString("");
+
+                            if (!plugin.isBlank() && !plugin.equalsIgnoreCase("None") && !itemId.isBlank())
+                                lockItem.node("item").set("%s:%s".formatted(plugin.toLowerCase(Locale.ROOT), itemId));
+
+                            final ConfigurationNode oldFallback = lockItem.node("default-lock-item");
+                            if (!oldFallback.virtual()) {
+                                final ConfigurationNode fallback = lockItem.node("fallback");
+                                for (final Map.Entry<Object, ? extends ConfigurationNode> entry : oldFallback.childrenMap().entrySet())
+                                    fallback.node(entry.getKey()).from(entry.getValue());
+                            }
+
+                            return null;
+                        })
+                        .build()
+                )
                 .build()
         );
     }
@@ -92,8 +117,41 @@ public class PluginConfig implements VersionedConfig {
         public boolean enabled = true;
 
         @Comment("""
-            If the default lock recipe should be enabled (loaded) when the plugin is enabled
-            If using an item plugin this will automatically be disabled""")
+            The item used as a lock. Prefix the id with the plugin that owns it: nexo:my_lock, oraxen:my_lock, itemsadder:my_lock, ia:my_lock
+            A bare id or a minecraft: prefix is a vanilla material, for example "iron_ingot".
+            Leave this blank to always use the fallback item defined below.""")
+        public String item = "";
+
+        @Comment("The item used when \"item\" is blank or when it cannot be resolved because the owning plugin is missing or the id is unknown. Uses minimessage color formats.")
+        public Fallback fallback = new Fallback();
+
+        @ConfigSerializable
+        public static class Fallback {
+            @Comment("Turn this off to disable locks entirely instead of using fallback")
+            public boolean enabled = true;
+
+            public String material = "IRON_INGOT";
+
+            @Comment("An item model key, like \"boltux:lock\". Recommended instead of custom model data on 1.21.4 and above. Leave blank to not use.")
+            public String itemModel = "";
+
+            @Comment("Legacy model selector. Set to 0 to disable it. The bundled resourcepack uses 8792")
+            public int customModelData = 8792;
+
+            @Comment("""
+                The fallback needs at least one of item model, custom model data or display name.
+                Without any of them it would be an ordinary material, and every one of them on the server would be usable as a lock.""")
+            public String displayName = "<gray>Iron Lock</gray>";
+
+            public List<String> lore = List.of(
+                "<yellow>Shift-Right Click to Use</yellow>",
+                "<yellow>Lockable Things: Containers, Doors, Gates, Trapdoors</yellow>"
+            );
+        }
+
+        @Comment("""
+            If the default lock recipe should be registered when the plugin is enabled
+            Only applies when "item" is blank, custom plugin item is expected to bring its own recipe.""")
         public boolean enableCraftingRecipe = true;
 
         @Comment("If protected blocks/entities will drop a lock item when broken")
@@ -111,28 +169,6 @@ public class PluginConfig implements VersionedConfig {
             public String effect = "minecraft:entity.zombie.attack_iron_door";
             public double volume = 0.25;
             public double pitch = 1.0;
-        }
-
-        @Comment("Possible entries are \"ItemsAdder\", \"MMOItems\", \"Nexo\", \"Oraxen\" or \"None\". Leave blank or use \"None\" to use the default lock item")
-        public String itemPlugin = "";
-
-        @Comment("The identifier of the custom lock item. Only applicable if using an item plugin defined above")
-        public String customLockItemId = "";
-
-        @Comment("""
-            The default lock item if no item plugin is specified
-            Uses MiniMessage color formats""")
-        public DefaultLockItem defaultLockItem = new DefaultLockItem();
-
-        @ConfigSerializable
-        public static class DefaultLockItem {
-            public String material = "IRON_INGOT";
-            public int customModelData = 8792;
-            public String displayName = "<gray><b>Iron Lock</b></gray>";
-            public List<String> lore = List.of(
-                "<yellow>Shift-Right Click to Use</yellow>",
-                "<yellow>Lockable Things: Containers, Doors, Gates, Trapdoors</yellow>"
-            );
         }
     }
 

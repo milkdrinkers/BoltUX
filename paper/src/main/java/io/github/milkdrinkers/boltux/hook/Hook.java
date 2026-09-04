@@ -1,10 +1,6 @@
 package io.github.milkdrinkers.boltux.hook;
 
 import io.github.milkdrinkers.boltux.hook.bstats.BStatsHook;
-import io.github.milkdrinkers.boltux.hook.itemsadder.ItemsAdderHook;
-import io.github.milkdrinkers.boltux.hook.mmoitems.MMOItemsHook;
-import io.github.milkdrinkers.boltux.hook.nexo.NexoHook;
-import io.github.milkdrinkers.boltux.hook.oraxen.OraxenHook;
 import io.github.milkdrinkers.boltux.hook.packetevents.PacketEventsHook;
 import io.github.milkdrinkers.boltux.hook.quickshop.QuickShopHook;
 import io.github.milkdrinkers.boltux.hook.towny.TownyHook;
@@ -21,10 +17,6 @@ public enum Hook {
     PacketEvents(PacketEventsHook.class, "PacketEvents", true),
     Vault(VaultHook.class, "Vault", true),
     Towny(TownyHook.class, "Towny", true),
-    ItemsAdder(ItemsAdderHook.class, "ItemsAdder", true),
-    Nexo(NexoHook.class, "Nexo", true),
-    Oraxen(OraxenHook.class, "Oraxen", true),
-    MMOItems(MMOItemsHook.class, "MMOItems", true),
     QuickShop(QuickShopHook.class, "QuickShop-Hikari", true);
 
     private final @NotNull Class<? extends AbstractHook> hookClass; // The hook class used by this hook
@@ -158,25 +150,5 @@ public enum Hook {
     @NotNull
     public static QuickShopHook getQuickShopHook() {
         return (QuickShopHook) Hook.QuickShop.get();
-    }
-
-    @NotNull
-    public static ItemsAdderHook getItemsAdderHook() {
-        return (ItemsAdderHook) Hook.ItemsAdder.get();
-    }
-
-    @NotNull
-    public static NexoHook getNexoHook() {
-        return (NexoHook) Hook.Nexo.get();
-    }
-
-    @NotNull
-    public static OraxenHook getOraxenHook() {
-        return (OraxenHook) Hook.Oraxen.get();
-    }
-
-    @NotNull
-    public static MMOItemsHook getMMOItemsHook() {
-        return (MMOItemsHook) Hook.MMOItems.get();
     }
 }

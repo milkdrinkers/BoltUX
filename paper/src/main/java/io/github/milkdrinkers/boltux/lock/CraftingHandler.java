@@ -5,11 +5,11 @@ import io.github.milkdrinkers.boltux.BoltUX;
 import io.github.milkdrinkers.boltux.Reloadable;
 import io.github.milkdrinkers.boltux.api.BoltUXAPI;
 import io.github.milkdrinkers.boltux.config.Settings;
-import io.github.milkdrinkers.boltux.data.ItemPlugin;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
+import org.jetbrains.annotations.NotNull;
 
 public final class CraftingHandler implements Reloadable {
     private final AbstractBoltUX plugin;
@@ -20,16 +20,19 @@ public final class CraftingHandler implements Reloadable {
 
     @Override
     public void onEnable(AbstractBoltUX plugin) {
-        if (Settings.isDefaultLockCraftingRecipeEnabled() && Settings.isLockItemEnabled() && Settings.getItemPlugin().equals(ItemPlugin.NONE)) {
-            if (plugin.getServer().getRecipe(new NamespacedKey(BoltUX.getInstance(), "lock")) == null) {
+        if (Settings.isDefaultLockCraftingRecipeEnabled() && Settings.isLockItemEnabled()) {
+            if (plugin.getServer().getRecipe(lockRecipeKey()) == null) {
                 plugin.getServer().addRecipe(getLockRecipe());
             }
         }
     }
 
+    public static @NotNull NamespacedKey lockRecipeKey() {
+        return new NamespacedKey(BoltUX.getInstance(), "lock");
+    }
+
     public static Recipe getLockRecipe() {
-        final NamespacedKey key = new NamespacedKey(BoltUX.getInstance(), "lock");
-        final ShapedRecipe lockRecipe = new ShapedRecipe(key, BoltUXAPI.getInstance().getLockItem());
+        final ShapedRecipe lockRecipe = new ShapedRecipe(lockRecipeKey(), BoltUXAPI.getInstance().getLockItem());
         lockRecipe.shape(" % ", "@ @", "@@@");
         lockRecipe.setIngredient('@', Material.IRON_INGOT);
         lockRecipe.setIngredient('%', Material.IRON_NUGGET);

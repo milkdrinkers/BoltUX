@@ -8,6 +8,9 @@
     },
     "commands": {
       "help": "<yellow>BoltUX Commands:\n<yellow>/boltux getlock <green>Spawn a lock item",
+      "getlock": {
+        "unavailable": "<red>No lock item is available. Check the server log for why it could not be resolved."
+      },
       "translation": {
         "help": "\n<white>Translations subcommands:\n  <dark_gray>• <white>reload: <gray><i>Reloads the translation files.\n  <dark_gray>• <white>test <node>: <gray><i>Test a translation.\n",
         "reloaded": "<green>Successfully reloaded translations!",

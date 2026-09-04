@@ -28,6 +28,7 @@ configurate-core = { module = "org.spongepowered:configurate-core", version.ref 
 configurate-yaml = { module = "org.spongepowered:configurate-yaml", version.ref = "configurate" }
 colorparser-common = { module = "io.github.milkdrinkers:colorparser-common", version.ref = "colorparser" }
 colorparser-paper = { module = "io.github.milkdrinkers:colorparser-paper", version.ref = "colorparser" }
+itemutils = "io.github.milkdrinkers:itemutils:1.1.0"
 threadutil-common = { module = "io.github.milkdrinkers:threadutil-common", version.ref = "threadutil" }
 threadutil-bukkit = { module = "io.github.milkdrinkers:threadutil-bukkit", version.ref = "threadutil" }
 commandapi-core = { module = "dev.jorel:commandapi-core", version.ref = "commandapi" }
@@ -40,12 +41,7 @@ vault = "com.github.MilkBowl:VaultAPI:1.7.1"
 packetevents = "com.github.retrooper:packetevents-spigot:2.13.0"
 boltbukkit = "org.popcraft:bolt-bukkit:1.1.79"
 entitylib = "io.github.tofaa2:spigot:3.3.7-SNAPSHOT"
-itemsadder = "dev.lone:api-itemsadder:4.0.10"
-nexo = "com.nexomc:nexo:1.10.0"
-oraxen = "io.th0rgal:oraxen:1.192.0"
 towny = "com.palmergames.bukkit.towny:towny:0.101.2.0"
-mmoitems = "net.Indyuce:MMOItems-API:6.10.1-SNAPSHOT"
-mythiclib = "io.lumine:MythicLib-dist:1.7.1-SNAPSHOT"
 quickshop-bukkit = { module = "com.ghostchu:quickshop-bukkit", version.ref = "quickshop" }
 quickshop-api = { module = "com.ghostchu:quickshop-api", version.ref = "quickshop" }
 

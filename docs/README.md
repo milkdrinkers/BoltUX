@@ -49,8 +49,15 @@ BoltUX uses packets in order to display a red glowing effect to the client when 
 ### Optional Hooks
 * #### [Towny](https://github.com/TownyAdvanced/Towny), [BoltTowny](https://github.com/pop4959/BoltTowny/tree/master)
     If Towny is used, BoltUX will automatically use TownyAPI in order to provide Town and Nation members as suggestions in the Add Access Menu. If both Towny and BoltTowny are used, Town sources will be supported in the menus.
-* #### [ItemsAdder](https://itemsadder.devs.beer/), [MMOItems](https://gitlab.com/phoenix-dvpmt/mmoitems), [Nexo](https://docs.nexomc.com/), [Oraxen](https://oraxen.com/)
-    The above plugins are used to create and manage custom items. BoltUX supports the use of either of them for the optional lock item. If you wish to create a custom lock item using one of these item frameworks, set ``lock-item.item-plugin`` to the plugin name and ``lock-item.custom-lock-item-id`` to the item's id in ``plugins/BoltUX/config.yml``.
+* #### [ItemsAdder](https://itemsadder.devs.beer/), [Nexo](https://docs.nexomc.com/), [Oraxen](https://oraxen.com/)
+    Custom item plugins. To use an item from one of them as the lock, set `lock-item.item` to the items id prefixed with the plugin that owns it:
+
+    ```yaml
+    lock-item:
+      item: "nexo:my_lock" # or oraxen:my_lock, itemsadder:my_lock, ia:my_lock
+    ```
+
+    A bare id or a `minecraft:` prefix is treated as a vanilla material. Leave `item` blank to use the built in fallback item instead.
 
 ---
 
@@ -82,5 +89,29 @@ Uploads server and plugin configs plus the latest log to [mclo.gs](https://mclo.
 BoltUX creates `plugins/BoltUX/config.yml` on first start and reads it once when the plugin loads.
 
 Translations live in `plugins/BoltUX/lang/`, and `/boltux translation reload` reloads them without a restart.
+
+### Lock item
+
+```yaml
+lock-item:
+  enabled: true
+
+  # nexo:my_lock | oraxen:my_lock | itemsadder:my_lock | ia:my_lock
+  # A bare id or minecraft:<id> is a vanilla material.
+  # Blank means "always use the fallback below".
+  item: ""
+
+  # Used when "item" is blank, or when it cannot be resolved because the owning plugin is missing or the id is unknown.
+  fallback:
+    enabled: true # off means locks are disabled rather than falling back
+    material: IRON_INGOT
+    item-model: "" # 1.21.4+ component, recommended. Blank to skip
+    custom-model-data: 8792 # legacy, 0 to skip. The bundled resourcepack uses 8792
+    display-name: "<gray>Iron Lock</gray>"
+    lore:
+      - "<yellow>Shift-Right Click to Use</yellow>"
+```
+
+The fallback needs at least one of `item-model`, `custom-model-data` or `display-name`. Without any of them it would be an ordinary material and every one of them on the server would count as a lock, so BoltUX refuses it and turns locks off with an error in the console.
 
 ---
